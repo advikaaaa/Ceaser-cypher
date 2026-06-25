@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caesar Cipher</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0D1117;
+      --surface:   #161B22;
+      --border:    #30363D;
+      --text:      #C9D1D9;
+      --muted:     #6E7681;
+      --accent:    #00D4FF;
+      --accent-dim:#004D5C;
+      --red:       #FF6B6B;
+      --green:     #3FB950;
+      --radius:    10px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 16px 64px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--bg);
+    }
+    .logo-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+    header p {
+      color: var(--muted);
+      font-size: 14px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── CARD ── */
+    .card {
+      width: 100%;
+      max-width: 680px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+    }
+
+    /* ── MODE TOGGLE ── */
+    .mode-toggle {
+      display: flex;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 28px;
+      width: fit-content;
+    }
+    .mode-btn {
+      padding: 7px 22px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+    }
+    .mode-btn.active {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    /* ── LABELS & SECTIONS ── */
+    .field-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    /* ── TEXT AREAS ── */
+    textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      line-height: 1.7;
+      padding: 14px 16px;
+      resize: vertical;
+      min-height: 110px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    textarea:focus { border-color: var(--accent); }
+
+    /* ── SHIFT CONTROL ── */
+    .shift-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 20px 0 24px;
+      flex-wrap: wrap;
+    }
+    .shift-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      flex: 1;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: box-shadow 0.15s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      box-shadow: 0 0 0 4px rgba(0,212,255,0.2);
+    }
+    .shift-number {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 16px;
+      padding: 5px 12px;
+      width: 60px;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .shift-number:focus { border-color: var(--accent); }
+
+    /* ── CIPHER BTN ── */
+    .btn-run {
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius);
+      padding: 12px 28px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn-run:hover { opacity: 0.88; }
+    .btn-run:active { transform: scale(0.97); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0 20px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── OUTPUT AREA ── */
+    .output-wrapper {
+      position: relative;
+    }
+    #output {
+      min-height: 110px;
+      cursor: default;
+      color: var(--accent);
+      border-color: var(--accent-dim);
+    }
+    .copy-btn {
+      position: absolute;
+      top: 10px; right: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: 'Inter', sans-serif;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); }
+
+    /* ── ANIMATION STRIP ── */
+    .anim-strip {
+      margin-top: 24px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      min-height: 56px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+    }
+    .char-cell {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 24px;
+    }
+    .char-top {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .char-arrow {
+      font-size: 9px;
+      color: var(--accent-dim);
+      line-height: 1.2;
+    }
+    .char-bot {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .char-space {
+      width: 10px;
+    }
+    .strip-label {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* ── ALPHABET WHEEL ── */
+    .wheel-wrap {
+      margin-top: 24px;
+      overflow: hidden;
+    }
+    .wheel-row {
+      display: flex;
+      gap: 2px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+    .wheel-cell {
+      width: 24px;
+      text-align: center;
+      padding: 4px 0;
+      border-radius: 4px;
+      transition: background 0.2s, color 0.2s;
+      color: var(--muted);
+    }
+    .wheel-cell.hi-plain { background: var(--accent-dim); color: var(--accent); }
+    .wheel-cell.hi-cipher { background: rgba(63,185,80,0.15); color: var(--green); }
+    .wheel-row + .wheel-row { margin-top: 2px; }
+
+    /* ── FOOTER ── */
+    footer {
+      margin-top: 40px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 500px) {
+      .card { padding: 20px; }
+      .shift-row { flex-direction: column; align-items: stretch; }
+      .btn-run { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">C</div>
+    <span class="logo-name">caesar-cipher</span>
+  </div>
+  <p>Classic substitution cipher — shift, encode, decode.</p>
+</header>
+
+<div class="card">
+
+  <!-- Mode Toggle -->
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="btn-encode" onclick="setMode('encode')">Encode</button>
+    <button class="mode-btn"        id="btn-decode" onclick="setMode('decode')">Decode</button>
+  </div>
+
+  <!-- Input -->
+  <label class="field-label" for="input">Message</label>
+  <textarea id="input" placeholder="Type your message here…" oninput="onInputChange()"></textarea>
+
+  <!-- Shift + Run -->
+  <div class="shift-row">
+    <div class="shift-group">
+      <label class="field-label" style="margin:0;white-space:nowrap">Shift key</label>
+      <input type="range" id="slider" min="1" max="25" value="13"
+             oninput="syncShift('slider')" />
+      <input type="number" id="shiftNum" class="shift-number" min="1" max="25" value="13"
+             oninput="syncShift('number')" />
+    </div>
+    <button class="btn-run" onclick="run()">&#9654;&nbsp; Run</button>
+  </div>
+
+  <!-- Output -->
+  <div class="divider">Result</div>
+  <label class="field-label">Output</label>
+  <div class="output-wrapper">
+    <textarea id="output" readonly placeholder="Output appears here…"></textarea>
+    <button class="copy-btn" id="copyBtn" onclick="copyOutput()">Copy</button>
+  </div>
+
+  <!-- Animation strip -->
+  <div id="stripWrap" style="display:none">
+    <div class="strip-label" style="margin-top:20px">Character map (first 20 chars)</div>
+    <div class="anim-strip" id="animStrip"></div>
+  </div>
+
+  <!-- Alphabet wheel -->
+  <div class="wheel-wrap" id="wheelWrap" style="display:none">
+    <div class="strip-label" style="margin-top:20px">Alphabet shift wheel</div>
+    <div class="wheel-row" id="wheelPlain"></div>
+    <div class="wheel-row" id="wheelCipher"></div>
+  </div>
+
+</div>
+
+<footer>
+  Built with vanilla JS &nbsp;·&nbsp;
+  Caesar Cipher algorithm in Python (<a href="ceaser_cipher.py">ceaser_cipher.py</a>)
+</footer>
+
+<script>
+  /* ── CORE ALGORITHM (mirrors ceaser_cipher.py) ── */
+  const A = 65, Z = 90, RANGE = 26;
+
+  function caesarShift(message, shift) {
+    let result = '';
+    for (const ch of message.toUpperCase()) {
+      if (ch >= 'A' && ch <= 'Z') {
+        let code = ch.charCodeAt(0) + shift;
+        if (code > Z) code -= RANGE;
+        if (code < A) code += RANGE;
+        result += String.fromCharCode(code);
+      } else {
+        result += ch;
+      }
+    }
+    return result.toLowerCase();
+  }
+
+  /* ── STATE ── */
+  let mode = 'encode';   // 'encode' | 'decode'
+  let shift = 13;
+
+  function setMode(m) {
+    mode = m;
+    document.getElementById('btn-encode').classList.toggle('active', m === 'encode');
+    document.getElementById('btn-decode').classList.toggle('active', m === 'decode');
+    run();
+  }
+
+  function syncShift(src) {
+    const v = Math.max(1, Math.min(25,
+      parseInt(src === 'slider'
+        ? document.getElementById('slider').value
+        : document.getElementById('shiftNum').value) || 1
+    ));
+    shift = v;
+    document.getElementById('slider').value = v;
+    document.getElementById('shiftNum').value = v;
+    updateWheel();
+    if (document.getElementById('input').value) run();
+  }
+
+  function onInputChange() {
+    // live update on each keystroke
+    run();
+  }
+
+  /* ── RUN ── */
+  function run() {
+    const msg = document.getElementById('input').value;
+    const effectiveShift = mode === 'decode' ? (RANGE - shift) : shift;
+    const out = caesarShift(msg, effectiveShift);
+    document.getElementById('output').value = out;
+    buildStrip(msg, out);
+    updateWheel();
+  }
+
+  /* ── CHARACTER MAP STRIP ── */
+  function buildStrip(input, output) {
+    const strip = document.getElementById('animStrip');
+    const wrap  = document.getElementById('stripWrap');
+    if (!input.trim()) { wrap.style.display = 'none'; return; }
+    wrap.style.display = '';
+
+    const inp = input.toUpperCase().slice(0, 20);
+    const out = output.toUpperCase().slice(0, 20);
+    strip.innerHTML = '';
+
+    for (let i = 0; i < inp.length; i++) {
+      const ch = inp[i];
+      if (ch === ' ') {
+        const sp = document.createElement('div');
+        sp.className = 'char-space';
+        strip.appendChild(sp);
+        continue;
+      }
+      const cell = document.createElement('div');
+      cell.className = 'char-cell';
+      cell.innerHTML = `
+        <span class="char-top">${ch}</span>
+        <span class="char-arrow">↓</span>
+        <span class="char-bot">${out[i] ? out[i] : ch}</span>
+      `;
+      strip.appendChild(cell);
+    }
+  }
+
+  /* ── ALPHABET WHEEL ── */
+  const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+  function updateWheel() {
+    const pw = document.getElementById('wheelPlain');
+    const cw = document.getElementById('wheelCipher');
+    const ww = document.getElementById('wheelWrap');
+    ww.style.display = '';
+
+    const effectiveShift = mode === 'decode' ? (RANGE - shift) : shift;
+
+    pw.innerHTML = '';
+    cw.innerHTML = '';
+
+    ALPHA.forEach((ch, i) => {
+      const pc = document.createElement('div');
+      pc.className = 'wheel-cell hi-plain';
+      pc.textContent = ch;
+      pw.appendChild(pc);
+
+      const ci = (i + effectiveShift) % RANGE;
+      const cc = document.createElement('div');
+      cc.className = 'wheel-cell hi-cipher';
+      cc.textContent = ALPHA[ci];
+      cw.appendChild(cc);
+    });
+  }
+
+  /* ── COPY ── */
+  function copyOutput() {
+    const out = document.getElementById('output').value;
+    if (!out) return;
+    navigator.clipboard.writeText(out).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = '✓ Copied';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+    });
+  }
+
+  /* ── INIT ── */
+  updateWheel();
+</script>
+</body>
+</html>
